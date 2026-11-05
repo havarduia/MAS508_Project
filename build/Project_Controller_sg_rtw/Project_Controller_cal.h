@@ -4,8 +4,45 @@
 
 /* Storage class 'PageSwitching', for system '<Root>' */
 struct Project_Controller_cal_type {
+  real_T Ao[36];                       /* Variable: Ao
+                                        * Referenced by: '<S1>/Ao'
+                                        */
+  real_T Bo[12];                       /* Variable: Bo
+                                        * Referenced by: '<S1>/Bo'
+                                        */
+  real_T K[6];                         /* Variable: K
+                                        * Referenced by: '<S1>/K'
+                                        */
+  real_T Ke;                           /* Variable: Ke
+                                        * Referenced by:
+                                        *   '<S1>/Ke'
+                                        *   '<S1>/xN0'
+                                        */
+  real_T preMap[2];                    /* Variable: preMap
+                                        * Referenced by: '<S3>/z0'
+                                        */
+  real_T rHigh;                        /* Variable: rHigh
+                                        * Referenced by: '<Root>/step size'
+                                        */
+  real_T rLow;                         /* Variable: rLow
+                                        * Referenced by:
+                                        *   '<Root>/rLow'
+                                        *   '<Root>/step size'
+                                        */
+  real_T tExc;                         /* Variable: tExc
+                                        * Referenced by: '<S1>/time since tExc'
+                                        */
+  real_T uLim[2];                      /* Variable: uLim
+                                        * Referenced by: '<S1>/limit'
+                                        */
+  real_T vBias;                        /* Variable: vBias
+                                        * Referenced by: '<S1>/vBias'
+                                        */
+  real_T x0map[6];                     /* Variable: x0map
+                                        * Referenced by: '<S1>/xhat0'
+                                        */
   real_T samesign_const;               /* Mask Parameter: samesign_const
-                                        * Referenced by: '<S3>/Constant'
+                                        * Referenced by: '<S4>/Constant'
                                         */
   real_T zero_Value;                   /* Expression: 0
                                         * Referenced by: '<S1>/zero'
@@ -123,12 +160,6 @@ struct Project_Controller_cal_type {
   real_T xN_gainval;                   /* Computed Parameter: xN_gainval
                                         * Referenced by: '<S1>/xN'
                                         */
-  real_T Observer_C[36];               /* Expression: eye(size(Ao, 1))
-                                        * Referenced by: '<S1>/Observer'
-                                        */
-  real_T Observer_D[12];               /* Expression: zeros(size(Ao, 1), 2)
-                                        * Referenced by: '<S1>/Observer'
-                                        */
   real_T Gain_Gain;                    /* Expression: 1
                                         * Referenced by: '<Root>/Gain'
                                         */
@@ -196,14 +227,8 @@ struct Project_Controller_cal_type {
   real_T SpeedgoatAnalogOutput1_P7;    /* Expression: parDaSimult
                                         * Referenced by: '<Root>/Speedgoat Analog Output1'
                                         */
-  real_T Reference_A[3];               /* Computed Parameter: Reference_A
-                                        * Referenced by: '<Root>/Reference'
-                                        */
-  real_T Reference_B;                  /* Computed Parameter: Reference_B
-                                        * Referenced by: '<Root>/Reference'
-                                        */
-  real_T Reference_C[2];               /* Computed Parameter: Reference_C
-                                        * Referenced by: '<Root>/Reference'
+  real_T C_Gain[2];                    /* Expression: preD.C
+                                        * Referenced by: '<S3>/C'
                                         */
   real_T pulse_Amp;                    /* Expression: 1
                                         * Referenced by: '<Root>/pulse'
@@ -214,8 +239,17 @@ struct Project_Controller_cal_type {
   real_T pulse_Duty;                   /* Computed Parameter: pulse_Duty
                                         * Referenced by: '<Root>/pulse'
                                         */
-  real_T pulse_PhaseDelay;             /* Expression: 2
+  real_T pulse_PhaseDelay;             /* Expression: tHold
                                         * Referenced by: '<Root>/pulse'
+                                        */
+  real_T D_Gain;                       /* Expression: preD.D
+                                        * Referenced by: '<S3>/D'
+                                        */
+  real_T A_Gain[4];                    /* Expression: preD.A
+                                        * Referenced by: '<S3>/A'
+                                        */
+  real_T B_Gain[2];                    /* Expression: preD.B
+                                        * Referenced by: '<S3>/B'
                                         */
 };
 

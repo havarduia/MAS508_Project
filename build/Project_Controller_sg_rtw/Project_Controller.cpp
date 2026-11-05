@@ -7,9 +7,9 @@
  *
  * Code generation for model "Project_Controller".
  *
- * Model version              : 15.10
+ * Model version              : 15.14
  * Simulink Coder version : 25.2 (R2025b) 28-Jul-2025
- * C++ source code generated on : Sun Nov  1 21:26:34 2026
+ * C++ source code generated on : Thu Nov  5 15:29:30 2026
  *
  * Target selection: speedgoat.tlc
  * Note: GRT includes extra infrastructure and instrumentation for prototyping
@@ -21,7 +21,6 @@
 #include "Project_Controller.h"
 #include "rtwtypes.h"
 #include "Project_Controller_cal.h"
-#include "rte_Project_Controller_parameters.h"
 #include "Project_Controller_private.h"
 #include <cmath>
 
@@ -100,34 +99,11 @@ real_T rt_powd_snf(real_T u0, real_T u1)
 /* Model step function */
 void Project_Controller_step(void)
 {
-  real_T xnew[6];
-  real_T tmp[2];
-  real_T Observer;
-  real_T tmp_2;
-  real_T tmp_3;
   real_T u0;
   real_T u2;
-  real_T *tmp_0;
-  real_T *tmp_1;
-  int_T i;
-  int_T j;
-
-  /* Sum: '<S1>/minus bias' incorporates:
-   *  Constant: '<S1>/vBias'
-   */
-  tmp_3 = *get_vBias();
-
-  /* Gain: '<Root>/step size' */
-  tmp_2 = *get_rLow();
-
-  /* Saturate: '<S1>/limit' */
-  tmp_1 = get_uLim();
-
-  /* Update for DiscreteStateSpace: '<S1>/Observer' */
-  tmp_0 = get_Bo();
-  for (i = 0; i < 2; i++) {
-    tmp[i] = (get_xPre0())[i];
-  }
+  real_T xhat0;
+  int32_T i;
+  int32_T i_0;
 
   /* S-Function (sg_IO183_setup_s): '<Root>/Setup1' */
 
@@ -158,96 +134,106 @@ void Project_Controller_step(void)
   /* Outport: '<Root>/Payload position X[m]' */
   Project_Controller_Y.PayloadpositionXm = Project_Controller_B.Xm;
 
+  /* Gain: '<S1>/xN0' */
+  xhat0 = 2015.5534425789861 / Project_Controller_cal->Ke;
+
+  /* Gain: '<S1>/xN0' */
+  Project_Controller_B.xN0 = xhat0 * Project_Controller_B.Xm;
+
+  /* DiscreteIntegrator: '<S1>/xN' */
+  if (Project_Controller_DW.xN_IC_LOADING != 0) {
+    Project_Controller_DW.xN_DSTATE = Project_Controller_B.xN0;
+  }
+
   /* DiscreteIntegrator: '<S1>/xN' */
   Project_Controller_B.xN = Project_Controller_DW.xN_DSTATE;
 
   /* Gain: '<S1>/Ke' */
-  Project_Controller_B.Ke_b = *get_Ke() * Project_Controller_B.xN;
+  Project_Controller_B.Ke = Project_Controller_cal->Ke * Project_Controller_B.xN;
 
   /* Gain: '<S1>/K' */
   u0 = 0.0;
   for (i = 0; i < 6; i++) {
-    /* DiscreteStateSpace: '<S1>/Observer' */
-    Observer = 0.0;
-    for (j = 0; j < 6; j++) {
-      Observer += Project_Controller_cal->Observer_C[6 * j + i] *
-        Project_Controller_DW.Observer_DSTATE[j];
+    /* Gain: '<S1>/xhat0' */
+    xhat0 = Project_Controller_cal->x0map[i] * Project_Controller_B.Xm;
+    Project_Controller_B.xhat0[i] = xhat0;
+
+    /* Delay: '<S1>/Observer' */
+    if (Project_Controller_DW.icLoad) {
+      Project_Controller_DW.Observer_DSTATE[i] = xhat0;
     }
 
-    /* DiscreteStateSpace: '<S1>/Observer' */
-    Project_Controller_B.Observer[i] = Observer;
+    /* Delay: '<S1>/Observer' */
+    xhat0 = Project_Controller_DW.Observer_DSTATE[i];
+    Project_Controller_B.Observer[i] = xhat0;
 
     /* Gain: '<S1>/K' */
-    u0 += (get_K())[i] * Observer;
+    u0 += Project_Controller_cal->K[i] * xhat0;
   }
 
   /* Gain: '<S1>/K' */
-  Project_Controller_B.K_l = u0;
+  Project_Controller_B.K = u0;
 
   /* DigitalClock: '<S1>/clock' */
   Project_Controller_B.clock = Project_Controller_M->Timing.t[0];
 
   /* Bias: '<S1>/time since tExc' */
-  Observer = -*get_tExc();
+  xhat0 = -Project_Controller_cal->tExc;
 
   /* Bias: '<S1>/time since tExc' */
-  Project_Controller_B.timesincetExc = Project_Controller_B.clock + Observer;
+  Project_Controller_B.timesincetExc = Project_Controller_B.clock + xhat0;
 
   /* Fcn: '<S1>/chirp' */
   u2 = Project_Controller_B.timesincetExc;
-  Observer = rt_powd_snf(u2, 2.0);
+  xhat0 = rt_powd_snf(u2, 2.0);
 
   /* Fcn: '<S1>/chirp' */
   Project_Controller_B.chirp = std::sin((0.3 *
-    Project_Controller_B.timesincetExc + 0.16416666666666666 * Observer) *
+    Project_Controller_B.timesincetExc + 0.16416666666666666 * xhat0) *
     6.2831853071795862) * 0.0 + std::sin((Project_Controller_B.timesincetExc +
     5.0) * 628.31853071795865) * 0.0;
 
   /* Sum: '<S1>/uCmd' */
-  Project_Controller_B.uCmd = (Project_Controller_B.Ke_b -
-    Project_Controller_B.K_l) + Project_Controller_B.chirp;
+  Project_Controller_B.uCmd = (Project_Controller_B.Ke - Project_Controller_B.K)
+    + Project_Controller_B.chirp;
 
   /* Sum: '<S1>/plus bias' incorporates:
    *  Constant: '<S1>/vBias'
    */
-  Project_Controller_B.plusbias = Project_Controller_B.uCmd + tmp_3;
+  Project_Controller_B.plusbias = Project_Controller_B.uCmd +
+    Project_Controller_cal->vBias;
 
   /* Saturate: '<S1>/limit' */
-  Observer = tmp_1[0];
-  u2 = tmp_1[1];
+  xhat0 = Project_Controller_cal->uLim[0];
+  u2 = Project_Controller_cal->uLim[1];
   u0 = Project_Controller_B.plusbias;
   if (u0 > u2) {
     /* Saturate: '<S1>/limit' */
     Project_Controller_B.limit = u2;
-  } else if (u0 < Observer) {
+  } else if (u0 < xhat0) {
     /* Saturate: '<S1>/limit' */
-    Project_Controller_B.limit = Observer;
+    Project_Controller_B.limit = xhat0;
   } else {
     /* Saturate: '<S1>/limit' */
     Project_Controller_B.limit = u0;
   }
 
-  /* Fcn: '<Root>/inverse driver' */
-  Project_Controller_B.inversedriver = ((Project_Controller_B.limit /
-    1.0178760197630929 + 0.104) * static_cast<real_T>(Project_Controller_B.limit
-    >= 0.0) + (Project_Controller_B.limit / 0.68886558913259832 + 0.214) *
-    static_cast<real_T>(Project_Controller_B.limit < 0.0)) * 0.0 +
-    Project_Controller_B.limit;
+  /* End of Saturate: '<S1>/limit' */
 
   /* Gain: '<Root>/Gain' */
   Project_Controller_B.Gain = Project_Controller_cal->Gain_Gain *
-    Project_Controller_B.inversedriver;
+    Project_Controller_B.limit;
 
   /* Saturate: '<Root>/Saturation Input: [0, 5] V2' */
   u0 = Project_Controller_B.Gain;
-  Observer = Project_Controller_cal->SaturationInput05V2_LowerSat;
+  xhat0 = Project_Controller_cal->SaturationInput05V2_LowerSat;
   u2 = Project_Controller_cal->SaturationInput05V2_UpperSat;
   if (u0 > u2) {
     /* Saturate: '<Root>/Saturation Input: [0, 5] V2' */
     Project_Controller_B.u = u2;
-  } else if (u0 < Observer) {
+  } else if (u0 < xhat0) {
     /* Saturate: '<Root>/Saturation Input: [0, 5] V2' */
-    Project_Controller_B.u = Observer;
+    Project_Controller_B.u = xhat0;
   } else {
     /* Saturate: '<Root>/Saturation Input: [0, 5] V2' */
     Project_Controller_B.u = u0;
@@ -260,14 +246,14 @@ void Project_Controller_step(void)
 
   /* Saturate: '<Root>/Saturation Input: [0, 5] V1' */
   u0 = Project_Controller_B.Abs1;
-  Observer = Project_Controller_cal->SaturationInput05V1_LowerSat;
+  xhat0 = Project_Controller_cal->SaturationInput05V1_LowerSat;
   u2 = Project_Controller_cal->SaturationInput05V1_UpperSat;
   if (u0 > u2) {
     /* Saturate: '<Root>/Saturation Input: [0, 5] V1' */
     Project_Controller_B.u_c = u2;
-  } else if (u0 < Observer) {
+  } else if (u0 < xhat0) {
     /* Saturate: '<Root>/Saturation Input: [0, 5] V1' */
-    Project_Controller_B.u_c = Observer;
+    Project_Controller_B.u_c = xhat0;
   } else {
     /* Saturate: '<Root>/Saturation Input: [0, 5] V1' */
     Project_Controller_B.u_c = u0;
@@ -298,28 +284,109 @@ void Project_Controller_step(void)
     sfcnOutputs(rts,0);
   }
 
-  /* DiscreteStateSpace: '<Root>/Reference' */
-  {
-    Project_Controller_B.Reference = (Project_Controller_cal->Reference_C[0])*
-      Project_Controller_DW.Reference_DSTATE[0]
-      + (Project_Controller_cal->Reference_C[1])*
-      Project_Controller_DW.Reference_DSTATE[1];
+  /* Gain: '<S3>/z0' */
+  Project_Controller_B.z0[0] = Project_Controller_cal->preMap[0] *
+    Project_Controller_B.Xm;
+  Project_Controller_B.z0[1] = Project_Controller_cal->preMap[1] *
+    Project_Controller_B.Xm;
+
+  /* Delay: '<S3>/state' */
+  if (Project_Controller_DW.icLoad_f) {
+    Project_Controller_DW.state_DSTATE[0] = Project_Controller_B.z0[0];
+    Project_Controller_DW.state_DSTATE[1] = Project_Controller_B.z0[1];
   }
 
+  /* Delay: '<S3>/state' */
+  xhat0 = Project_Controller_DW.state_DSTATE[0];
+  Project_Controller_B.state[0] = xhat0;
+
+  /* Gain: '<S3>/C' */
+  u0 = Project_Controller_cal->C_Gain[0] * xhat0;
+
+  /* Delay: '<S3>/state' */
+  xhat0 = Project_Controller_DW.state_DSTATE[1];
+  Project_Controller_B.state[1] = xhat0;
+
+  /* Gain: '<S3>/C' */
+  u0 += Project_Controller_cal->C_Gain[1] * xhat0;
+
+  /* Gain: '<S3>/C' */
+  Project_Controller_B.C = u0;
+
+  /* DiscretePulseGenerator: '<Root>/pulse' */
+  Project_Controller_B.pulse = (Project_Controller_DW.clockTickCounter <
+    Project_Controller_cal->pulse_Duty) &&
+    (Project_Controller_DW.clockTickCounter >= 0) ?
+    Project_Controller_cal->pulse_Amp : 0.0;
+
+  /* DiscretePulseGenerator: '<Root>/pulse' */
+  if (Project_Controller_DW.clockTickCounter >=
+      Project_Controller_cal->pulse_Period - 1.0) {
+    Project_Controller_DW.clockTickCounter = 0;
+  } else {
+    Project_Controller_DW.clockTickCounter++;
+  }
+
+  /* Gain: '<Root>/step size' */
+  xhat0 = Project_Controller_cal->rHigh - Project_Controller_cal->rLow;
+
+  /* Gain: '<Root>/step size' */
+  Project_Controller_B.stepsize = xhat0 * Project_Controller_B.pulse;
+
+  /* Sum: '<Root>/reference step' incorporates:
+   *  Constant: '<Root>/rLow'
+   */
+  Project_Controller_B.referencestep = Project_Controller_B.stepsize +
+    Project_Controller_cal->rLow;
+
+  /* Gain: '<S3>/D' */
+  Project_Controller_B.D = Project_Controller_cal->D_Gain *
+    Project_Controller_B.referencestep;
+
+  /* Sum: '<S3>/output sum' */
+  Project_Controller_B.outputsum = Project_Controller_B.C +
+    Project_Controller_B.D;
+
   /* Sum: '<S1>/error' */
-  Project_Controller_B.error = Project_Controller_B.Reference -
+  Project_Controller_B.error = Project_Controller_B.outputsum -
     Project_Controller_B.Xm;
+
+  /* Gain: '<S1>/Ao' */
+  for (i = 0; i < 6; i++) {
+    Project_Controller_B.Ao[i] = 0.0;
+  }
 
   /* Sum: '<S1>/minus bias' incorporates:
    *  Constant: '<S1>/vBias'
    */
-  Project_Controller_B.minusbias = Project_Controller_B.limit - tmp_3;
+  Project_Controller_B.minusbias = Project_Controller_B.limit -
+    Project_Controller_cal->vBias;
 
-  /* SignalConversion generated from: '<S1>/Observer' */
-  Project_Controller_B.TmpSignalConversionAtObserverIn[0] =
+  /* SignalConversion generated from: '<S1>/Bo' */
+  Project_Controller_B.TmpSignalConversionAtBoInport1[0] =
     Project_Controller_B.minusbias;
-  Project_Controller_B.TmpSignalConversionAtObserverIn[1] =
+  Project_Controller_B.TmpSignalConversionAtBoInport1[1] =
     Project_Controller_B.Xm;
+  for (i = 0; i < 6; i++) {
+    /* Gain: '<S1>/Ao' */
+    u0 = Project_Controller_B.Observer[i];
+    for (i_0 = 0; i_0 < 6; i_0++) {
+      Project_Controller_B.Ao[i_0] += Project_Controller_cal->Ao[6 * i + i_0] *
+        u0;
+    }
+
+    /* Gain: '<S1>/Bo' */
+    Project_Controller_B.Bo[i] = 0.0;
+  }
+
+  /* Gain: '<S1>/Bo' */
+  for (i = 0; i < 2; i++) {
+    u0 = Project_Controller_B.TmpSignalConversionAtBoInport1[i];
+    for (i_0 = 0; i_0 < 6; i_0++) {
+      Project_Controller_B.Bo[i_0] += Project_Controller_cal->Bo[6 * i + i_0] *
+        u0;
+    }
+  }
 
   /* RelationalOperator: '<S1>/saturated' */
   Project_Controller_B.saturated = (Project_Controller_B.plusbias !=
@@ -359,8 +426,8 @@ void Project_Controller_step(void)
   Project_Controller_B.signproduct = Project_Controller_B.signe *
     Project_Controller_B.signu;
 
-  /* RelationalOperator: '<S3>/Compare' incorporates:
-   *  Constant: '<S3>/Constant'
+  /* RelationalOperator: '<S4>/Compare' incorporates:
+   *  Constant: '<S4>/Constant'
    */
   Project_Controller_B.Compare = (Project_Controller_B.signproduct >
     Project_Controller_cal->samesign_const);
@@ -382,65 +449,50 @@ void Project_Controller_step(void)
 
   /* End of Switch: '<S1>/anti-windup' */
 
-  /* DiscretePulseGenerator: '<Root>/pulse' */
-  Project_Controller_B.pulse = (Project_Controller_DW.clockTickCounter <
-    Project_Controller_cal->pulse_Duty) &&
-    (Project_Controller_DW.clockTickCounter >= 0) ?
-    Project_Controller_cal->pulse_Amp : 0.0;
+  /* Gain: '<S3>/A' */
+  u0 = Project_Controller_B.state[0];
+  Project_Controller_B.A[0] = Project_Controller_cal->A_Gain[0] * u0;
+  Project_Controller_B.A[1] = Project_Controller_cal->A_Gain[1] * u0;
 
-  /* DiscretePulseGenerator: '<Root>/pulse' */
-  if (Project_Controller_DW.clockTickCounter >=
-      Project_Controller_cal->pulse_Period - 1.0) {
-    Project_Controller_DW.clockTickCounter = 0;
-  } else {
-    Project_Controller_DW.clockTickCounter++;
-  }
+  /* Gain: '<S3>/B' */
+  Project_Controller_B.B[0] = Project_Controller_cal->B_Gain[0] *
+    Project_Controller_B.referencestep;
 
-  /* Gain: '<Root>/step size' */
-  Observer = *get_rHigh() - tmp_2;
+  /* Gain: '<S3>/A' */
+  u0 = Project_Controller_B.state[1];
+  Project_Controller_B.A[0] += Project_Controller_cal->A_Gain[2] * u0;
+  Project_Controller_B.A[1] += Project_Controller_cal->A_Gain[3] * u0;
 
-  /* Gain: '<Root>/step size' */
-  Project_Controller_B.stepsize = Observer * Project_Controller_B.pulse;
+  /* Gain: '<S3>/B' */
+  Project_Controller_B.B[1] = Project_Controller_cal->B_Gain[1] *
+    Project_Controller_B.referencestep;
 
-  /* Sum: '<Root>/reference step' incorporates:
-   *  Constant: '<Root>/rLow'
-   */
-  Project_Controller_B.referencestep = Project_Controller_B.stepsize + tmp_2;
+  /* Sum: '<S3>/state sum' */
+  Project_Controller_B.statesum[0] = Project_Controller_B.A[0] +
+    Project_Controller_B.B[0];
+  Project_Controller_B.statesum[1] = Project_Controller_B.A[1] +
+    Project_Controller_B.B[1];
 
   /* Update for DiscreteIntegrator: '<S1>/xN' */
+  Project_Controller_DW.xN_IC_LOADING = 0U;
   Project_Controller_DW.xN_DSTATE += Project_Controller_cal->xN_gainval *
     Project_Controller_B.antiwindup;
 
-  /* Update for DiscreteStateSpace: '<S1>/Observer' */
+  /* Update for Delay: '<S1>/Observer' */
+  Project_Controller_DW.icLoad = false;
   for (i = 0; i < 6; i++) {
-    u0 = 0.0;
-    for (j = 0; j < 6; j++) {
-      u0 += (get_Ao())[6 * j + i] * Project_Controller_DW.Observer_DSTATE[j];
-    }
+    /* Sum: '<S1>/observer sum' */
+    u0 = Project_Controller_B.Ao[i] + Project_Controller_B.Bo[i];
+    Project_Controller_B.observersum[i] = u0;
 
-    u0 += tmp_0[i] * Project_Controller_B.TmpSignalConversionAtObserverIn[0];
-    u0 += tmp_0[i + 6] * Project_Controller_B.TmpSignalConversionAtObserverIn[1];
-    xnew[i] = u0;
+    /* Update for Delay: '<S1>/Observer' */
+    Project_Controller_DW.Observer_DSTATE[i] = u0;
   }
 
-  for (i = 0; i < 6; i++) {
-    Project_Controller_DW.Observer_DSTATE[i] = xnew[i];
-  }
-
-  /* Update for DiscreteStateSpace: '<Root>/Reference' */
-  {
-    real_T xnew[2];
-    xnew[0] = (Project_Controller_cal->Reference_A[0])*
-      Project_Controller_DW.Reference_DSTATE[0]
-      + (Project_Controller_cal->Reference_A[1])*
-      Project_Controller_DW.Reference_DSTATE[1];
-    xnew[0] += Project_Controller_cal->Reference_B*
-      Project_Controller_B.referencestep;
-    xnew[1] = (Project_Controller_cal->Reference_A[2])*
-      Project_Controller_DW.Reference_DSTATE[0];
-    (void) std::memcpy(&Project_Controller_DW.Reference_DSTATE[0], xnew,
-                       sizeof(real_T)*2);
-  }
+  /* Update for Delay: '<S3>/state' */
+  Project_Controller_DW.icLoad_f = false;
+  Project_Controller_DW.state_DSTATE[0] = Project_Controller_B.statesum[0];
+  Project_Controller_DW.state_DSTATE[1] = Project_Controller_B.statesum[1];
 
   /* Update absolute time for base rate */
   /* The "clockTick0" counts the number of times the code of this task has
@@ -1034,32 +1086,19 @@ void Project_Controller_initialize(void)
   }
 
   /* Start for DiscretePulseGenerator: '<Root>/pulse' */
-  Project_Controller_DW.clockTickCounter = -20000;
+  Project_Controller_DW.clockTickCounter = -120000;
 
-  {
-    real_T tmp[2];
-    int32_T i;
+  /* InitializeConditions for DiscreteIntegrator: '<S1>/xN' */
+  Project_Controller_DW.xN_IC_LOADING = 1U;
 
-    /* InitializeConditions for DiscreteIntegrator: '<S1>/xN' */
-    Project_Controller_DW.xN_DSTATE = *get_xN0();
+  /* InitializeConditions for Delay: '<S1>/Observer' */
+  Project_Controller_DW.icLoad = true;
 
-    /* InitializeConditions for DiscreteStateSpace: '<S1>/Observer' */
-    for (i = 0; i < 6; i++) {
-      Project_Controller_DW.Observer_DSTATE[i] = (get_xhat0())[i];
-    }
+  /* InitializeConditions for Delay: '<S3>/state' */
+  Project_Controller_DW.icLoad_f = true;
 
-    /* End of InitializeConditions for DiscreteStateSpace: '<S1>/Observer' */
-    for (i = 0; i < 2; i++) {
-      tmp[i] = (get_xPre0())[i];
-    }
-
-    /* InitializeConditions for DiscreteStateSpace: '<Root>/Reference' */
-    Project_Controller_DW.Reference_DSTATE[0] = get_xPre0()[0];
-    Project_Controller_DW.Reference_DSTATE[1] = get_xPre0()[1];
-
-    /* SystemInitialize for MATLAB Function: '<S2>/BAW033k' */
-    Project_Controller_DW.sfEvent = Project_Controller_CALL_EVENT;
-  }
+  /* SystemInitialize for MATLAB Function: '<S2>/BAW033k' */
+  Project_Controller_DW.sfEvent = Project_Controller_CALL_EVENT;
 }
 
 /* Model terminate function */

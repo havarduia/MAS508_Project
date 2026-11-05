@@ -7,9 +7,9 @@
  *
  * Code generation for model "Project_Controller".
  *
- * Model version              : 15.10
+ * Model version              : 15.14
  * Simulink Coder version : 25.2 (R2025b) 28-Jul-2025
- * C++ source code generated on : Sun Nov  1 21:26:34 2026
+ * C++ source code generated on : Thu Nov  5 15:29:30 2026
  *
  * Target selection: speedgoat.tlc
  * Note: GRT includes extra infrastructure and instrumentation for prototyping

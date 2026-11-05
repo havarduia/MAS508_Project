@@ -7,9 +7,9 @@
  *
  * Code generation for model "Project_Controller".
  *
- * Model version              : 15.10
+ * Model version              : 15.14
  * Simulink Coder version : 25.2 (R2025b) 28-Jul-2025
- * C++ source code generated on : Sun Nov  1 21:26:34 2026
+ * C++ source code generated on : Thu Nov  5 15:29:30 2026
  *
  * Target selection: speedgoat.tlc
  * Note: GRT includes extra infrastructure and instrumentation for prototyping
@@ -31,7 +31,6 @@
 #include "verify/verifyIntrf.h"
 #include "Project_Controller_types.h"
 #include <stddef.h>
-#include <cstring>
 
 extern "C"
 {
@@ -54,6 +53,7 @@ extern "C"
 
 }
 
+#include <cstring>
 #include "Project_Controller_cal.h"
 
 /* Macros for accessing real-time model data structure */
@@ -141,36 +141,47 @@ extern "C"
 struct B_Project_Controller_T {
   real_T SpeedgoatAnalogInput1;        /* '<Root>/Speedgoat Analog Input1' */
   real_T Xm;                           /* '<Root>/Sum' */
+  real_T xN0;                          /* '<S1>/xN0' */
   real_T xN;                           /* '<S1>/xN' */
-  real_T Ke_b;                         /* '<S1>/Ke' */
+  real_T Ke;                           /* '<S1>/Ke' */
+  real_T xhat0[6];                     /* '<S1>/xhat0' */
   real_T Observer[6];                  /* '<S1>/Observer' */
-  real_T K_l;                          /* '<S1>/K' */
+  real_T K;                            /* '<S1>/K' */
   real_T clock;                        /* '<S1>/clock' */
   real_T timesincetExc;                /* '<S1>/time since tExc' */
   real_T chirp;                        /* '<S1>/chirp' */
   real_T uCmd;                         /* '<S1>/uCmd' */
   real_T plusbias;                     /* '<S1>/plus bias' */
   real_T limit;                        /* '<S1>/limit' */
-  real_T inversedriver;                /* '<Root>/inverse driver' */
   real_T Gain;                         /* '<Root>/Gain' */
   real_T u;                           /* '<Root>/Saturation Input: [0, 5] V2' */
   real_T Abs1;                         /* '<Root>/Abs1' */
   real_T u_c;                         /* '<Root>/Saturation Input: [0, 5] V1' */
   real_T polarity;                     /* '<Root>/Switch' */
-  real_T Reference;                    /* '<Root>/Reference' */
+  real_T z0[2];                        /* '<S3>/z0' */
+  real_T state[2];                     /* '<S3>/state' */
+  real_T C;                            /* '<S3>/C' */
+  real_T pulse;                        /* '<Root>/pulse' */
+  real_T stepsize;                     /* '<Root>/step size' */
+  real_T referencestep;                /* '<Root>/reference step' */
+  real_T D;                            /* '<S3>/D' */
+  real_T outputsum;                    /* '<S3>/output sum' */
   real_T error;                        /* '<S1>/error' */
+  real_T Ao[6];                        /* '<S1>/Ao' */
   real_T minusbias;                    /* '<S1>/minus bias' */
-  real_T TmpSignalConversionAtObserverIn[2];
+  real_T TmpSignalConversionAtBoInport1[2];
+  real_T Bo[6];                        /* '<S1>/Bo' */
   real_T signe;                        /* '<S1>/sign e' */
   real_T signu;                        /* '<S1>/sign u' */
   real_T signproduct;                  /* '<S1>/sign product' */
   real_T antiwindup;                   /* '<S1>/anti-windup' */
-  real_T pulse;                        /* '<Root>/pulse' */
-  real_T stepsize;                     /* '<Root>/step size' */
-  real_T referencestep;                /* '<Root>/reference step' */
+  real_T observersum[6];               /* '<S1>/observer sum' */
+  real_T A[2];                         /* '<S3>/A' */
+  real_T B[2];                         /* '<S3>/B' */
+  real_T statesum[2];                  /* '<S3>/state sum' */
   real_T y;                            /* '<S2>/BAW033k' */
   boolean_T saturated;                 /* '<S1>/saturated' */
-  boolean_T Compare;                   /* '<S3>/Compare' */
+  boolean_T Compare;                   /* '<S4>/Compare' */
   boolean_T integrate;                 /* '<S1>/integrate' */
 };
 
@@ -178,7 +189,7 @@ struct B_Project_Controller_T {
 struct DW_Project_Controller_T {
   real_T xN_DSTATE;                    /* '<S1>/xN' */
   real_T Observer_DSTATE[6];           /* '<S1>/Observer' */
-  real_T Reference_DSTATE[2];          /* '<Root>/Reference' */
+  real_T state_DSTATE[2];              /* '<S3>/state' */
   void *Setup1_PWORK;                  /* '<Root>/Setup1' */
   void *SpeedgoatAnalogInput1_PWORK;   /* '<Root>/Speedgoat Analog Input1' */
   void *SpeedgoatAnalogOutput1_PWORK;  /* '<Root>/Speedgoat Analog Output1' */
@@ -197,10 +208,6 @@ struct DW_Project_Controller_T {
   struct {
     void *AQHandles;
   } TAQSigLogging_InsertedFor_Switc;   /* synthesized block */
-
-  struct {
-    void *AQHandles;
-  } TAQSigLogging_InsertedFor_inver;   /* synthesized block */
 
   struct {
     void *AQHandles;
@@ -227,6 +234,9 @@ struct DW_Project_Controller_T {
   int_T Setup1_IWORK[8];               /* '<Root>/Setup1' */
   int_T SpeedgoatAnalogInput1_IWORK[5];/* '<Root>/Speedgoat Analog Input1' */
   int_T SpeedgoatAnalogOutput1_IWORK[5];/* '<Root>/Speedgoat Analog Output1' */
+  uint8_T xN_IC_LOADING;               /* '<S1>/xN' */
+  boolean_T icLoad;                    /* '<S1>/Observer' */
+  boolean_T icLoad_f;                  /* '<S3>/state' */
   boolean_T doneDoubleBufferReInit;    /* '<S2>/BAW033k' */
 };
 
@@ -442,7 +452,8 @@ extern "C"
  * '<Root>' : 'Project_Controller'
  * '<S1>'   : 'Project_Controller/Controller'
  * '<S2>'   : 'Project_Controller/Inductive Sensor '
- * '<S3>'   : 'Project_Controller/Controller/same sign'
- * '<S4>'   : 'Project_Controller/Inductive Sensor /BAW033k'
+ * '<S3>'   : 'Project_Controller/Reference'
+ * '<S4>'   : 'Project_Controller/Controller/same sign'
+ * '<S5>'   : 'Project_Controller/Inductive Sensor /BAW033k'
  */
 #endif                                 /* Project_Controller_h_ */

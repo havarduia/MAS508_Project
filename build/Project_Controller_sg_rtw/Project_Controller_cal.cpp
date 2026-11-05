@@ -3,8 +3,82 @@
 
 /* Storage class 'PageSwitching' */
 Project_Controller_cal_type Project_Controller_cal_impl = {
+  /* Variable: Ao
+   * Referenced by: '<S1>/Ao'
+   */
+  { 0.933377605842641, 6.6018904927479041E-9, 0.00013053795739864334,
+    3.5161590569421942E-15, 1.1927085309442718E-10, 7.5775987413817939E-18,
+    0.0010866050062159865, 0.99999996012846915, -0.00078623601679351184,
+    1.2906871633161236E-6, 0.025815652054341925, 4.0151054137888754E-9,
+    -2.73225594519381, 9.9993739526732633E-5, 0.99981326796672276,
+    9.007718851518006E-11, 2.2318592069683766E-6, 2.4697362238168395E-13,
+    0.4581675290224666, -0.0025815856872101637, -0.0094000834266839885,
+    0.99955235663122322, -0.0732188899834147, 0.0092302227361795563,
+    1.5296041586476932E-5, -8.6362339646082257E-8, -2.7298389122351667E-7,
+    9.9984990567383378E-5, 0.99999618232647636, 4.6489376099311491E-7,
+    96.5548311899045, -0.54335852761887171, -2.1415211895561095,
+    -0.094106992275212631, -9.978324306552258, 0.95697220843728481 },
+
+  /* Variable: Bo
+   * Referenced by: '<S1>/Bo'
+   */
+  { 0.11958431418232265, 2.7388448209125713E-10, 8.1698394857585748E-6,
+    1.0021591746327627E-16, 4.3514162153532976E-12, 1.7704744915798965E-19,
+    -97.014085323933173, 0.54594015317761269, 2.1517075089995878,
+    0.094553344956826033, 10.025727544481333, 0.033797564811430231 },
+
+  /* Variable: K
+   * Referenced by: '<S1>/K'
+   */
+  { 0.64927283209661546, 3500.0520919684532, 65.486337041810117,
+    -1537.496750264834, 254.04569775122593, 52.998100875366816 },
+
+  /* Variable: Ke
+   * Referenced by:
+   *   '<S1>/Ke'
+   *   '<S1>/xN0'
+   */
+  5000.0000000005994,
+
+  /* Variable: preMap
+   * Referenced by: '<S3>/z0'
+   */
+  { 2197.9981487793762, 2197.9981487793762 },
+
+  /* Variable: rHigh
+   * Referenced by: '<Root>/step size'
+   */
+  0.02,
+
+  /* Variable: rLow
+   * Referenced by:
+   *   '<Root>/rLow'
+   *   '<Root>/step size'
+   */
+  0.005,
+
+  /* Variable: tExc
+   * Referenced by: '<S1>/time since tExc'
+   */
+  5.0,
+
+  /* Variable: uLim
+   * Referenced by: '<S1>/limit'
+   */
+  { -5.0, 5.0 },
+
+  /* Variable: vBias
+   * Referenced by: '<S1>/vBias'
+   */
+  0.6,
+
+  /* Variable: x0map
+   * Referenced by: '<S1>/xhat0'
+   */
+  { 0.0, 1.0, 0.0, 1.0, 0.0, 1.0 },
+
   /* Mask Parameter: samesign_const
-   * Referenced by: '<S3>/Constant'
+   * Referenced by: '<S4>/Constant'
    */
   0.0,
 
@@ -193,18 +267,6 @@ Project_Controller_cal_type Project_Controller_cal_impl = {
    */
   0.0001,
 
-  /* Expression: eye(size(Ao, 1))
-   * Referenced by: '<S1>/Observer'
-   */
-  { 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0,
-    0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0,
-    0.0, 0.0, 0.0, 0.0, 0.0, 1.0 },
-
-  /* Expression: zeros(size(Ao, 1), 2)
-   * Referenced by: '<S1>/Observer'
-   */
-  { 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0 },
-
   /* Expression: 1
    * Referenced by: '<Root>/Gain'
    */
@@ -305,18 +367,8 @@ Project_Controller_cal_type Project_Controller_cal_impl = {
    */
   1.0,
 
-  /* Computed Parameter: Reference_A
-   * Referenced by: '<Root>/Reference'
-   */
-  { 1.9993334444320996, -0.99933355550618086, 1.0 },
-
-  /* Computed Parameter: Reference_B
-   * Referenced by: '<Root>/Reference'
-   */
-  0.000244140625,
-
-  /* Computed Parameter: Reference_C
-   * Referenced by: '<Root>/Reference'
+  /* Expression: preD.C
+   * Referenced by: '<S3>/C'
    */
   { 0.00022750499397474678, 0.00022745444292638964 },
 
@@ -328,17 +380,32 @@ Project_Controller_cal_type Project_Controller_cal_impl = {
   /* Computed Parameter: pulse_Period
    * Referenced by: '<Root>/pulse'
    */
-  120000.0,
+  240000.0,
 
   /* Computed Parameter: pulse_Duty
    * Referenced by: '<Root>/pulse'
    */
-  60000.0,
+  120000.0,
 
-  /* Expression: 2
+  /* Expression: tHold
    * Referenced by: '<Root>/pulse'
    */
-  2.0
+  12.0,
+
+  /* Expression: preD.D
+   * Referenced by: '<S3>/D'
+   */
+  0.0,
+
+  /* Expression: preD.A
+   * Referenced by: '<S3>/A'
+   */
+  { 1.9993334444320996, 1.0, -0.99933355550618086, 0.0 },
+
+  /* Expression: preD.B
+   * Referenced by: '<S3>/B'
+   */
+  { 0.000244140625, 0.0 }
 };
 
 Project_Controller_cal_type *Project_Controller_cal =
