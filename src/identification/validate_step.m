@@ -41,14 +41,12 @@ fprintf('model actuator peak y = %.1f mm above start\n', 1e3*max(yModel));
 
 if nargout == 0
   figure;
-  subplot(3,1,1);
-  plot(t, u); ylabel('u [V]'); grid on; title('Open-loop pulse: measured vs plant\_model');
-  subplot(3,1,2);
-  plot(t, 1e3*dx, t, 1e3*dxModel, '--', t, 1e3*kEff*dxModel, ':');
-  ylabel('x - x_{rest} [mm]'); grid on;
-  legend('measured', sprintf('model (fit %.0f%%)', fitPct), sprintf('model \\times k_{eff} = %.2f (fit %.0f%%)', kEff, fitScaled), 'Location', 'best');
-  subplot(3,1,3);
-  plot(t, 1e3*yModel); ylabel('model y [mm]'); xlabel('t [s]'); grid on;
+  subplot(2,1,1);
+  plot(t, u, 'r'); ylabel('Voltage [V]'); grid on; title('Input v(t)');
+  subplot(2,1,2);
+  plot(t, 1e3*dx, 'b', t, 1e3*dxModel, 'k--');
+  ylabel('Position [mm]'); xlabel('Time [s]'); grid on; title('Payload position x(t)');
+  legend('Measured', 'Model (Table 1 gain, \tau_m 18 ms)', 'Location', 'northoutside', 'Orientation', 'horizontal');
 end
 end
 
@@ -65,8 +63,8 @@ disp('validate_step self-check passed');
 end
 
 function [sys, x0] = loadModel()
-% kv = 0.66 in plant_model came from running this against last_run.mat with
-% kv = 1 (kEff = 0.657). With the default model kEff should now be ~1.
-[sys, p] = plant_model();
+% Final model: Table 1 input gain (kv 0.99, closed-loop frequency response), tauM 18 ms.
+% On last_run.mat kEff = 0.66: friction and eta < 1 eat a third of a short open-loop pulse.
+[sys, p] = plant_model(1, 0.99, 0.018);
 x0 = p.x0;
 end

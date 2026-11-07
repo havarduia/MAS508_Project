@@ -24,7 +24,7 @@ vMax  = 5;            % interface limit on the total voltage [V]
 vBias = 0.6;          % holding voltage = equilibrium input (L2b/L2c), measured in every rig run [V]
 sigX  = 22e-6;        % sensor noise std [m], sample-to-sample on last_run.mat rest data
 kv    = 0.99;         % input gain: 1.5x the datasheet model (0.66), see below
-tauM  = 0.018;        % actuator time constant from chirp run 4 + video [s]
+tauM  = 0.018;        % actuator time constant, frequency response of chirp run 4 [s]
 tauS  = 0.0106;       % sensor lag: Balluff -3 dB at 15 Hz = our 3.5 ms lag + 7 ms hold delay [s]
 % kv: closed-loop video FRFs gave 1.5-2x the model gain at 5-11 Hz, and with 1.5x the
 % model reproduces the rig's 6 Hz oscillation of v1 and run C's instability (robustness section).

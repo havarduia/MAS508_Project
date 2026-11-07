@@ -1,5 +1,5 @@
 %% REPRODUCE_RUNS  Does the updated true plant reproduce rig runs A, B and C?
-% True plant: tauM = 18 ms (chirp run 4 + video), sensor hold 14 ms + 3.5 ms lag,
+% True plant: tauM = 18 ms (chirp run 4 frequency response), sensor hold 14 ms + 3.5 ms lag,
 % measured driver map. Compares hold statistics: std and dominant frequency of X and U.
 %   A: nominal gains, no inverse map (vBias 0.3)
 %   B: nominal gains + inverse driver map

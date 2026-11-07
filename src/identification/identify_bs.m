@@ -5,10 +5,13 @@ function [bs, ks_dyn, zeta, wn] = identify_bs(t, x, ml)
 %          pulled down and released), ml - payload mass [kg] (default 0.51)
 %   identify_bs()  runs a self-check on synthetic data.
 %
-% Model: ml*xdd + bs*xd + ks*x = 0  ->  amplitude decays as exp(-sigma*t),
-% sigma = bs/(2*ml). Amplitude = (peak - next trough)/2, so the resting
-% position is never needed and the log does not have to run until settled.
-% sigma comes from a line fit of log(amplitude) vs time over all cycles.
+% Model: ml*xdd + bs*xd + ks*x = 0. Course method (L2d, Tutorial 2 problem 2), with
+% the oscillation amplitudes O_1 and O_{n+1} of two peaks n cycles apart:
+%   delta = ln(O_1/O_{n+1})/n,  zeta = delta/sqrt(delta^2 + 4 pi^2),
+%   Tosc = (t_{n+1} - t_1)/n,   wd = 2 pi/Tosc,  wn = wd/sqrt(1 - zeta^2),
+%   bs = 2 zeta wn ml,          ks = ml wn^2.
+% O_i = (peak - next trough)/2, so the resting position is not needed and the
+% log does not have to run until settled. n = all cycles in the log.
 %
 % From an SLRT run in the Simulation Data Inspector:
 %   ids = Simulink.sdi.getAllRunIDs;  r = Simulink.sdi.getRun(ids(end));
@@ -46,29 +49,32 @@ end
 Ap = (x(ip) - x(k))/2;
 tp = (t(ip) + t(k))/2;
 
-p = polyfit(tp, log(Ap), 1);
-sigma = -p(1);
-wd = 2*pi*(numel(ip) - 1) / (t(ip(end)) - t(ip(1)));
-wn = sqrt(wd^2 + sigma^2);
-zeta = sigma / wn;
-bs = 2*ml*sigma;
+n = numel(ip) - 1;
+delta = log(Ap(1)/Ap(end))/n;
+zeta = delta/sqrt(delta^2 + 4*pi^2);
+Tosc = (t(ip(end)) - t(ip(1)))/n;
+wd = 2*pi/Tosc;
+wn = wd/sqrt(1 - zeta^2);
+bs = 2*zeta*wn*ml;
 ks_dyn = ml*wn^2;
 
 fprintf('cycles used: %d over %.1f s, amplitude %.2f -> %.2f mm\n', numel(ip), tp(end) - tp(1), 1e3*Ap(1), 1e3*Ap(end));
-fprintf('fd = %.3f Hz, zeta = %.5f\n', wd/(2*pi), zeta);
+fprintf('n = %d cycles, delta = %.5f, Tosc = %.4f s, wd = %.3f rad/s, zeta = %.5f, wn = %.3f rad/s\n', n, delta, Tosc, wd, zeta, wn);
 fprintf('bs = %.4f Ns/m, ks (dynamic) = %.2f N/m\n', bs, ks_dyn);
 
 if nargout == 0
   figure;
   subplot(2,1,1);
-  plot(t, x*1e3); xlabel('t [s]'); ylabel('x [mm]'); grid on; title('Free decay');
+  plot(t, x*1e3, 'b'); hold on; plot(t(ip([1 end])), 1e3*x(ip([1 end])), 'ro', 'MarkerFaceColor', 'r');
+  text(t(ip(1)), 1e3*x(ip(1)), '  O_1', 'VerticalAlignment', 'bottom', 'FontSize', 14);
+  text(t(ip(end)), 1e3*x(ip(end)), 'O_{n+1}  ', 'VerticalAlignment', 'bottom', 'HorizontalAlignment', 'right', 'FontSize', 14);
+  xlabel('Time [s]'); ylabel('Position [mm]'); grid on;
+  title(sprintf('Impulse response, n = %d cycles', n));
   subplot(2,1,2);
-  semilogy(tp, Ap*1e3, 'o'); hold on;
-  semilogy(tp, 1e3*exp(polyval(p, tp)), '--');
-  xlabel('t [s]'); ylabel('amplitude [mm]'); grid on;
-  % straight line on this plot = viscous damping; curving down = friction dominates
-  legend('measured', sprintf('fit, \\sigma = %.4f 1/s', sigma));
-  title(sprintf('b_s = %.4f Ns/m, \\zeta = %.5f', bs, zeta));
+  kz = t > t(ip(1)) - 0.5*Tosc & t < t(ip(1)) + 4.5*Tosc;
+  plot(t(kz), x(kz)*1e3, 'b'); hold on; plot(t(ip(1:5)), 1e3*x(ip(1:5)), 'ro', 'MarkerFaceColor', 'r');
+  xlabel('Time [s]'); ylabel('Position [mm]'); grid on;
+  title('First cycles');
 end
 end
 

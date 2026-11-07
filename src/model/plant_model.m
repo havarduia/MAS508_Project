@@ -1,6 +1,6 @@
-function [sys, p] = plant_model(eta, kv, tauM, tauS)
+function [sys, p] = plant_model(eta, kv, tauM, tauS, ml)
 % PLANT_MODEL  BLDC motor + ball screw + spring/damper + payload
-%   [sys, p] = plant_model(eta, kv, tauM, tauS)
+%   [sys, p] = plant_model(eta, kv, tauM, tauS, ml)
 %     eta - ball screw efficiency (default 1.0, as the project description says)
 %     kv  - effective input voltage gain (default 0.66, from validate_step on
 %           last_run.mat: the payload travelled 0.66 x the modelled distance).
@@ -15,6 +15,7 @@ function [sys, p] = plant_model(eta, kv, tauM, tauS)
 %           measured position, x6' = (x - x6)/tauS, and the output becomes x6.
 %           Balluff BAW003K: -3 dB at 15 Hz (10.6 ms), matching our own staircase
 %           data (3.5 ms lag + 7 ms average delay of the ~14 ms update).
+%     ml   - payload mass [kg] (default 0.51, Table 1); for mass robustness checks
 %     sys - state space model, p - struct with the parameters
 %   plant_model()  with no outputs prints the model checks.
 %
@@ -30,6 +31,7 @@ if nargin < 1, eta = 1.0; end
 if nargin < 2, kv = 0.66; end
 if nargin < 3, tauM = []; end
 if nargin < 4, tauS = 0; end
+if nargin < 5, ml = 0.51; end
 
 %% Parameters (Table 1)
 p.ma   = 0.3;        % actuator moving mass [kg]
@@ -41,11 +43,11 @@ p.Jm   = 72e-6;      % [kg m^2]
 p.lead = 0.01;       % ball screw lead [m/rev]
 p.eta  = eta;
 p.kv   = kv;
-p.ml   = 0.51;       % payload mass [kg]
+p.ml   = ml;         % payload mass [kg]
 p.g    = 9.81;
 p.x0   = 0.00526;    % payload rest position, actuator at bottom (y = 0) [m]
 p.ks   = 131.66;     % [N/m]   free-decay test (identify_bs)
-p.bs   = 0.0048;     % [Ns/m]  free-decay test, zeta = 0.00026 (identify_bs)
+p.bs   = 0.0048;     % [Ns/m]  impulse response, logarithmic decrement, zeta = 0.00030 (identify_bs)
 
 %% Derived quantities
 p.N  = 2*pi/p.lead;                 % screw ratio: omega = N*ydot  [rad/m]
